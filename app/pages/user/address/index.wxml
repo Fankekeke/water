@@ -1,0 +1,31 @@
+<!--状态栏区域-->
+<view class="cu-custom" style="height:{{CustomBar}}px;">
+    <view class="cu-bar fixed none-bg text-white bg-img" style="height:{{CustomBar}}px;padding-top:{{StatusBar}}px;">
+        <navigator class='action canui-head-title' open-type="navigateBack" hover-class="none">
+            <text class='icon-back'></text> 地址管理
+        </navigator>
+    </view>
+</view>
+
+<view class="box" style="top: {{CustomBar}}px;">
+
+    <view class="cu-list menu bg-white">
+        <view class="cu-item" wx:for="{{addressList}}">
+            <view class='content'>
+                <view class="text-df">{{ item.takeUserName }} <text>{{ item.takeUserPhone }}</text> <view class='cu-tag bg-red round' wx:if="{{ item.defaultAddress }}">默认</view></view>
+                <view class='text-gray text-sm canui-xzwz'>{{ item.address }}</view>
+            </view>
+            <view class='action'><view class='text-grey icon-write' bindtap='edit' data-addressId='{{ item.id }}'></view></view>
+        </view>
+        <view class="cu-item" wx:if="{{ addressList.length === 0 }}">
+            <van-empty style="height: 100%;margin: 0 auto" description="无地址信息" />
+        </view>
+    </view>
+
+</view>
+
+<view class="canui-foor-fixed {{TabbarBot=='y'?'canui-tabbar-bottom':''}}">
+    <button class="cu-btn canui-color-gradual shadow-blur round lg" bindtap='add'><text class="icon-add"></text> 新增收货地址</button>
+</view>
+
+

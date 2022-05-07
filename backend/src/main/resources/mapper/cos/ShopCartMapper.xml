@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.ShopCartMapper">
+
+    <!-- 分页查询购物车信息 -->
+    <select id="shopCartInfoByPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        sc.id,
+        sc.product_code AS productCode,
+        sc.quantity,
+        sc.user_code AS userCode,
+        sc.create_date AS createDate,
+        pi.product_name AS productName,
+        dict.VALUEE AS productTypeLabel,
+        pi.images,
+        pi.standard,
+        pi.tag_ids AS tagIds,
+        pi.price,
+        pi.delete_flag AS productDeleteFlag,
+        si.name AS shopName,
+        si.phone,
+        si.principal,
+        si.delete_flag AS shopDeleteFlag,
+        ui.user_name AS userName,
+        ui.avatar
+        FROM
+        shop_cart sc
+        LEFT JOIN product_info pi ON ( pi.`code` = sc.product_code )
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        LEFT JOIN user_info ui ON ( ui.`code` = sc.user_code )
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type ) AND dict.TABLE_NAME = 'product_info'
+        WHERE
+        sc.delete_flag = 0
+        <if test="shopCart.userName != null and shopCart.userName != ''">
+            AND ui.user_name LIKE CONCAT('%',#{shopCart.userName},'%')
+        </if>
+        <if test="shopCart.shopName != null and shopCart.shopName != ''">
+            AND si.name LIKE CONCAT('%',#{shopCart.shopName},'%')
+        </if>
+        <if test="shopCart.productName != null and shopCart.productName != ''">
+            AND pi.product_name LIKE CONCAT('%',#{shopCart.productName},'%')
+        </if>
+        <if test="shopCart.productType != null">
+            AND pi.product_type = #{shopCart.productType}
+        </if>
+        ORDER BY
+        sc.create_date DESC
+    </select>
+
+    <!-- 根据用户获取购物车列表 -->
+    <select id="shopCartByUser" resultType="java.util.LinkedHashMap">
+        SELECT
+        sc.id,
+        sc.quantity,
+        sc.create_date AS createDate,
+        pi.product_name AS productName,
+        pi.images,
+        pi.code,
+        pi.content,
+        pi.stock,
+        pi.tag_ids AS tagIds,
+        pi.price,
+        pi.delete_flag AS productDeleteFlag,
+        si.name AS shopName,
+        si.code AS shopCode,
+        si.delete_flag AS shopDeleteFlag
+        FROM
+        shop_cart sc
+        LEFT JOIN product_info pi ON ( pi.`code` = sc.product_code )
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        WHERE
+        sc.delete_flag = 0
+        AND sc.user_code = #{ userCode }
+    </select>
+
+    <!-- 获取购物车列表详情 -->
+    <select id="shopCartDetail" resultType="java.util.LinkedHashMap">
+        SELECT
+        sc.id,
+        sc.quantity,
+        sc.create_date AS createDate,
+        pi.product_name AS productName,
+        pi.images,
+        pi.content,
+        pi.code,
+        pi.stock,
+        pi.tag_ids AS tagIds,
+        pi.price,
+        pi.delete_flag AS productDeleteFlag,
+        si.name AS shopName,
+        si.code AS shopCode,
+        si.delete_flag AS shopDeleteFlag
+        FROM
+        shop_cart sc
+        LEFT JOIN product_info pi ON ( pi.`code` = sc.product_code )
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        WHERE
+        sc.id in
+        <foreach item="item" collection="ids" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

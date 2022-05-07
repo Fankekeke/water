@@ -1,0 +1,34 @@
+<view class="cu-custom" style="height:{{CustomBar}}px;">
+    <view class="cu-bar fixed none-bg text-white bg-img" style="height:{{CustomBar}}px;padding-top:{{StatusBar}}px;">
+        <view class="head-title canui-head-title"></view>
+    </view>
+</view>
+<view class="box" style="top:{{CustomBar}}px;display: flex;flex-direction: row;flex-wrap: nowrap;justify-content: flex-start;padding-bottom: 0rpx;height: 100%">
+    <view class="sideBar">
+        <van-sidebar active-key="{{ activeKey }}" bind:change="onChange">
+            <van-sidebar-item wx:for="{{ typeList }}" title="{{ item }}" />
+        </van-sidebar>
+    </view>
+    <view class="bg-white canui-goods-list" style="top:{{CustomBar + 6}}px;width: 100%">
+        <view class="cu-list menu menu-avatar">
+            <view class="cu-item " wx:for="{{goodsList}}" bindtap='goodsDetail' data-code='{{ item.code }}'>
+                <view class="cu-avatar radius lg" style="background-image:url(http://127.0.0.1:9527/imagesWeb/{{ item.image }});"></view>
+                <view class='content' style="padding-left: 15px">
+                    <view class="canui-xzwz" style="font-size: 13px">{{ item.productName }}</view>
+                    <view class='text-red text-sm text-price'>
+                        <text style="margin-right: 10px">{{ item.price }}</text>
+                        <view class="cu-tag radius sm" wx:for="{{ item.tagArray }}" wx:for-item="tag">
+                            <text>{{ tag }}</text>
+                        </view>
+                    </view>
+                </view>
+                <view>
+                    <view class='icon-right text-gray' style="margin: 10px"></view>
+                </view>
+            </view>
+            <view wx:if="{{ goodsList.length === 0 }}">
+                <van-empty style="height: 400px;margin: 0 auto" description="无商品信息" />
+            </view>
+        </view>
+    </view>
+</view>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.OrderInfoMapper">
+
+    <!-- 分页查询订单信息 -->
+    <select id="orderInfoByPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        oi.id,
+        oi.code,
+        oi.all_price AS allPrice,
+        oi.order_status AS orderStatus,
+        oi.address_code AS addressCode,
+        oi.place_order_date AS placeOrderDate,
+        oi.pay_type AS payType,
+        oi.pay_date AS payDate,
+        oi.mailing_number AS mailingNumber,
+        oi.user_code AS userCode,
+        ui.user_name AS userName,
+        ui.avatar,
+        COUNT(oitem.id) AS orderItem
+        FROM
+        order_info oi
+        LEFT JOIN user_info ui ON ( ui.`code` = oi.user_code )
+        LEFT JOIN order_item oitem ON ( oitem.order_code = oi.`code` )
+        WHERE
+        oi.delete_flag = 0
+        <if test="orderInfo.userName != null and orderInfo.userName != ''">
+            AND ui.user_name LIKE CONCAT('%',#{orderInfo.userName},'%')
+        </if>
+        <if test="orderInfo.code != null and orderInfo.code != ''">
+            AND oi.code LIKE CONCAT('%',#{orderInfo.code},'%')
+        </if>
+            <if test="orderInfo.orderStatus != null">
+            AND oi.order_status = #{orderInfo.orderStatus}
+        </if>
+        <if test="orderInfo.payType != null">
+            AND oi.pay_type = #{orderInfo.payType}
+        </if>
+        GROUP BY oi.id
+        ORDER BY
+        oi.place_order_date DESC
+    </select>
+
+    <!-- 七天内订单量统计 -->
+    <select id="orderVolumeStatistics" resultType="java.util.LinkedHashMap">
+        SELECT
+        DATE_FORMAT( spo.days, '%m-%d' ) AS days,
+        COUNT( oi.`code` ) AS orderNum,
+        IFNULL( SUM( oi.all_price ), 0 ) AS orderPrice
+        FROM
+        (
+        SELECT
+            DATE_SUB( curdate(), INTERVAL + 0 DAY ) days UNION
+        SELECT
+            DATE_SUB( curdate(), INTERVAL + 1 DAY ) UNION
+        SELECT
+            DATE_SUB( curdate(), INTERVAL + 2 DAY ) UNION
+        SELECT
+            DATE_SUB( curdate(), INTERVAL + 3 DAY ) UNION
+        SELECT
+            DATE_SUB( curdate(), INTERVAL + 4 DAY ) UNION
+        SELECT
+            DATE_SUB( curdate(), INTERVAL + 5 DAY ) UNION
+        SELECT
+        DATE_SUB( curdate(), INTERVAL + 6 DAY )) spo
+        LEFT JOIN order_info oi ON (
+        DATE_FORMAT( oi.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( spo.days, '%Y-%m-%d' )) AND oi.order_status != '1'
+        GROUP BY
+        days
+        ORDER BY
+        days ASC
+    </select>
+
+    <!-- 本月订单量，收益统计 -->
+    <select id="orderStatisticsByCurrentMonth" resultType="java.util.LinkedHashMap">
+        SELECT
+        IFNULL(SUM( all_price ),0) AS price,
+        IFNULL(COUNT( 1 ) ,0) AS num
+        FROM
+        order_info
+        WHERE
+        order_status != '1'
+        AND DATE_FORMAT( pay_date, '%Y-%m' ) = DATE_FORMAT( CURDATE(), '%Y-%m' )
+    </select>
+
+    <!-- 本月收益类型占比 -->
+    <select id="orderStatisticsByCurrentMonthRate" resultType="java.util.LinkedHashMap">
+        SELECT
+        IFNULL(SUM( oitem.all_price ),0) AS price,
+        pi.product_name AS name
+        FROM
+        order_item oitem
+        LEFT JOIN product_info pi ON ( pi.`code` = oitem.product_code )
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        WHERE
+        oi.order_status != '1'
+        AND DATE_FORMAT( oi.pay_date, '%Y-%m' ) = DATE_FORMAT( CURDATE(), '%Y-%m' )
+        GROUP BY
+        pi.id
+    </select>
+
+    <!-- 获取代发货订单 -->
+    <select id="pendingOrder" resultType="java.util.LinkedHashMap">
+        SELECT
+        oi.code,
+        pi.product_name AS productName,
+	    pi.images,
+        oitem.all_price AS allPrice,
+        oitem.amount,
+        oi.pay_date AS payDate,
+        ui.user_name AS userName,
+        ui.avatar,
+        ui.user_name AS userName,
+        ai.address,
+        ai.take_user_name AS name,
+        ai.take_user_phone AS phone
+        FROM
+        order_info oi
+        LEFT JOIN user_info ui ON ( ui.`code` = oi.user_code )
+        LEFT JOIN address_info ai ON ( ai.`code` = oi.address_code )
+        LEFT JOIN order_item oitem ON (oitem.order_code = oi.`code`)
+	    LEFT JOIN product_info pi ON ( pi.`code` = oitem.product_code )
+        WHERE
+        oi.order_status = '2'
+        GROUP BY oitem.id
+        ORDER BY oi.pay_date DESC
+    </select>
+
+    <!-- 月统计订单量 收益额 -->
+    <select id="orderDataByMonth" resultType="java.util.LinkedHashMap">
+        SELECT
+        DATE_FORMAT( spo.day, '%m-%d' ) AS days,
+        COUNT( oi.`code` ) AS orderNum,
+        IFNULL( SUM( oi.all_price ), 0 ) AS orderPrice
+        FROM
+        (SELECT
+        date_add(
+        DATE_ADD( #{ date }, INTERVAL - DAY ( #{ date }) + 2 DAY ),
+        INTERVAL ( cast( help_topic_id AS signed INTEGER ) - 1 ) DAY
+        ) DAY
+        FROM
+        mysql.help_topic
+        WHERE
+        help_topic_id &lt; DAY ( last_day( #{ date } ) )
+        ORDER BY
+        help_topic_id) spo
+        LEFT JOIN order_info oi ON (
+        DATE_FORMAT( oi.place_order_date, '%Y-%m-%d' ) = DATE_FORMAT( spo.day, '%Y-%m-%d' )) AND oi.order_status != '1'
+        GROUP BY
+        days
+        ORDER BY
+        days ASC
+    </select>
+
+    <!-- 获取用户订单 -->
+    <select id="orderListByUser" resultType="cc.mrbird.febs.cos.entity.vo.OrderItemVo">
+        SELECT
+        oitem.order_code AS orderCode,
+        oitem.product_code AS productCode,
+        oitem.unit_price AS unitPrice,
+        oitem.amount,
+        oitem.all_price AS allPrice,
+        pi.product_name AS productName,
+        pi.tag_ids AS tagIds,
+	    pi.images,
+	    si.code AS shopCode,
+	    si.name AS shopName,
+	    oi.order_status AS orderStatus,
+	    oi.place_order_date AS placeOrderDate,
+	    oi.pay_type AS payType,
+	    oi.pay_date AS payDate
+        FROM
+        order_item oitem
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        LEFT JOIN product_info pi ON ( pi.`code` = oitem.product_code )
+        LEFT JOIN shop_info si ON ( si.`code` = pi.shop_code )
+        WHERE
+        1 = 1
+        AND oi.delete_flag = 0
+        AND oi.user_code = #{ userCode }
+    </select>
+
+    <!-- 获取订单项 -->
+    <select id="orderItemByCode" resultType="java.util.LinkedHashMap">
+        SELECT
+        oitem.id,
+        oitem.amount AS quantity,
+        pi.product_name AS productName,
+        pi.images,
+        pi.content,
+        pi.CODE,
+        pi.stock,
+        pi.tag_ids AS tagIds,
+        pi.price,
+        pi.delete_flag AS productDeleteFlag,
+        si.NAME AS shopName,
+        si.CODE AS shopCode,
+        si.delete_flag AS shopDeleteFlag
+        FROM
+        order_item oitem
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        LEFT JOIN product_info pi ON ( pi.`code` = oitem.product_code )
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        WHERE
+        oi.`code` = #{ orderCode }
+    </select>
+</mapper>

@@ -1,0 +1,64 @@
+{
+  "pages": [
+    "pages/home/index/index",
+    "pages/scar/index/index",
+    "pages/user/index/index",
+    "pages/auth/auth",
+    "pages/home/goods/index",
+    "pages/scar/goods/index",
+    "pages/address/add/index",
+    "pages/address/edit/index",
+    "pages/coupon/detail/index",
+    "pages/coupon/index/index",
+    "pages/home/bulletin/index",
+    "pages/home/groom/index",
+    "pages/home/search/index",
+    "pages/order/details/index",
+    "pages/order/index/index",
+    "pages/scar/order/index",
+    "pages/shop/goods/details",
+    "pages/shop/index/index",
+    "pages/shop/index/details",
+    "pages/shop/search/index",
+    "pages/user/address/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#39b54a",
+    "navigationBarTitleText": "shop",
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#aaaaaa",
+    "borderStyle": "white",
+    "backgroundColor": "#fff",
+    "selectedColor": "#F95A5F",
+    "list": [
+      {
+        "pagePath": "pages/home/index/index",
+        "iconPath": "img/home.png",
+        "selectedIconPath": "img/home1.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/scar/goods/index",
+        "iconPath": "img/product.png",
+        "selectedIconPath": "img/product1.png",
+        "text": "商品"
+      },
+      {
+        "pagePath": "pages/scar/index/index",
+        "iconPath": "img/goodscar.png",
+        "selectedIconPath": "img/goodscar1.png",
+        "text": "购物车"
+      },
+      {
+        "pagePath": "pages/user/index/index",
+        "iconPath": "img/my.png",
+        "selectedIconPath": "img/my1.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

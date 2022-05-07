@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.EvaluationMapper">
+
+    <!-- 分页查询评价信息 -->
+    <select id="orderEvaluationByPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        eva.id,
+        eva.score,
+        eva.code,
+        eva.content,
+        eva.images,
+        eva.create_date AS createDate,
+        pi.product_name AS productName,
+        dict.VALUEE AS productTypeLabel,
+        pi.images AS productImages,
+        pi.standard,
+        pi.tag_ids AS tagIds,
+        si.name AS shopName,
+        ui.user_name AS userName,
+        ui.avatar,
+        oi.order_code AS orderCode,
+        oi.unit_price AS unitPrice,
+        oi.amount,
+        oi.all_price AS allPrice
+        FROM
+        evaluation eva
+        LEFT JOIN user_info ui ON ( ui.`code` = eva.user_code )
+        LEFT JOIN order_item oi ON (oi.id = eva.order_item_id)
+        LEFT JOIN product_info pi ON ( pi.`code` = oi.product_code )
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type ) AND dict.TABLE_NAME = 'product_info'
+        WHERE
+        eva.delete_flag = 0
+        <if test="evaluation.productName != null and evaluation.productName != ''">
+            AND pi.product_name LIKE CONCAT('%',#{evaluation.productName},'%')
+        </if>
+        <if test="evaluation.userName != null and evaluation.userName != ''">
+            AND ui.user_name LIKE CONCAT('%',#{evaluation.userName},'%')
+        </if>
+        <if test="evaluation.shopName != null and evaluation.shopName != ''">
+            AND si.name LIKE CONCAT('%',#{evaluation.shopName},'%')
+        </if>
+        <if test="evaluation.productType != null">
+            AND pi.product_type = #{evaluation.productType}
+        </if>
+        GROUP BY eva.id
+        ORDER BY eva.create_date DESC
+    </select>
+
+    <!-- 商品评价 -->
+    <select id="productEvaluation" resultType="java.util.LinkedHashMap">
+        SELECT
+        eva.id,
+        eva.score,
+        eva.code,
+        eva.content,
+        eva.images,
+        eva.create_date AS createDate,
+        ui.user_name AS userName,
+        ui.avatar
+        FROM
+        evaluation eva
+        LEFT JOIN order_item oitem ON ( oitem.id = eva.order_item_id )
+        LEFT JOIN product_info pi ON ( oitem.product_code = pi.`code` )
+        LEFT JOIN user_info ui ON ( ui.`code` = eva.user_code )
+        WHERE
+        eva.delete_flag = 0
+        AND oitem.product_code = #{ productCode }
+    </select>
+
+    <!-- 根据订单编号获取评价信息 -->
+    <select id="evaluationByOrder" resultType="cc.mrbird.febs.cos.entity.Evaluation">
+        SELECT
+        eva.id,
+        eva.score,
+        eva.CODE,
+        eva.content,
+        eva.images,
+        eva.create_date AS createDate
+        FROM
+        evaluation eva
+        LEFT JOIN order_item oitem ON ( oitem.id = eva.order_item_id )
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        WHERE
+        oi.`code` = #{ orderCode }
+    </select>
+</mapper>

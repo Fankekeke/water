@@ -1,0 +1,24 @@
+page {
+    padding-top: 50px;
+    padding-bottom:170rpx;
+}
+.cu-custom{
+    position: absolute;
+    top: 0px;
+    width: 100%;
+}
+.box{
+    position: absolute;
+    top: 64px;
+    width: 100%;
+}
+.cu-custom .cu-bar{
+    padding-right:inherit;
+    background-image:linear-gradient(45deg, #39b54a, #8dc63f);
+}
+.bg-gradual-green {
+    background-image:linear-gradient(45deg, #39b54a, #8dc63f);
+}
+.text-green, .line-green, .lines-green {
+    color:#e45c5c;
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.OrderItemMapper">
+
+    <!-- 根据订单号获取购买商品详情 -->
+    <select id="orderItemList" resultType="java.util.LinkedHashMap">
+        SELECT
+        oi.id,
+        oi.product_code AS productCode,
+        oi.unit_price AS unitPrice,
+        oi.amount,
+        oi.all_price AS allPrice,
+        pi.product_name AS productName,
+        dict.VALUEE AS productTypeLabel,
+        pi.images,
+        pi.standard,
+        pi.tag_ids AS tagIds,
+        si.name AS shopName
+        FROM
+        order_item oi
+        LEFT JOIN product_info pi ON ( pi.`code` = oi.product_code )
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type )
+        AND dict.TABLE_NAME = 'product_info'
+        WHERE
+        oi.order_code = #{ code }
+    </select>
+</mapper>

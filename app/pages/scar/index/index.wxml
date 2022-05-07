@@ -1,0 +1,74 @@
+<view class="cu-custom" style="height:{{CustomBar}}px;">
+    <view class="cu-bar fixed none-bg text-white bg-img" style="height:{{CustomBar}}px;padding-top:{{StatusBar}}px;">
+        <view class="head-title canui-head-title"></view>
+    </view>
+</view>
+<view class="box" style="top:{{CustomBar}}px;">
+    <view class="canui-kong" wx:if='{{ orderList.length == 0 }}'>
+        <view class="bg-gradual-orange padding radius text-center shadow-blur canui-kong-icon">
+            <text class="icon-cart"></text>
+        </view>
+        <view class="text-lg padding text-center">
+            <text class="text-grey">购物车竟然是空的</text>
+        </view>
+    </view>
+    <view class="canui-card-order margin-top">
+        <checkbox-group bindchange="checkboxChange">
+            <view class="canui-order-item bg-white" wx:for="{{ orderList }}">
+                <view class="head-title-box">
+                    <checkbox class='round red' value="{{item.id}}" checked="{{ item.checked ? true : false }}" wx:if="{{ item.productDeleteFlag != 1 && item.shopDeleteFlag != 1 }}"></checkbox>
+                    <text class="icon-shop"></text>
+                    <text>{{ item.shopName }}</text>
+                    <text class="text-red" style="font-size: 11px;float: right;" wx:if="{{ item.productDeleteFlag == 1 || item.shopDeleteFlag == 1 }}">已下架</text>
+                    <text class="icon-right"></text>
+                </view>
+                <view class="cu-list menu menu-avatar">
+                    <view class="cu-item">
+                        <view class="canui-goods" style="width: 100%">
+                            <view class="cu-avatar radius lg" style="background-image:url(http://127.0.0.1:9527/imagesWeb/{{ item.image }});"></view>
+                            <view class='content' style="padding-left: 35px">
+                                <view class='canui-xzwz'>{{ item.productName }}</view>
+                                <view class='canui-tool'>
+                                    <text class='text-price text-red'>{{ item.itemPrice }}</text>
+                                    <view class='action-btn-sum' style="font-size: 11px" wx:if="{{ item.productDeleteFlag != 1 && item.shopDeleteFlag != 1 }}">
+                                        <button class='cu-btn' style="background-color: #F4F3F5;font-size: 18px" bindtap="quantityReduce" data-row="{{ item }}" data-index="{{ index }}">
+                                            -
+                                        </button>
+                                        <input class='ca-sum' name='input' type="number" value="{{ item.quantity }}" bindblur="onBlur" data-row="{{ item }}" data-index="{{ index }}" style="margin: 0px 3px;"></input>
+                                        <button class='cu-btn' style="background-color: #F4F3F5;font-size: 18px" bindtap="quantityAdd" data-row="{{ item }}" data-index="{{ index }}">
+                                            +
+                                        </button>
+                                    </view>
+                                    <view class='action-btn-sum' wx:else>
+                                        <van-button  type="danger" size="mini" bindtap="deleteCart" data-index="{{item.id}}">
+                                            删除
+                                        </van-button>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </checkbox-group>
+    </view>
+</view>
+<view class="cu-bar bg-white solid-bottom canui-foor-fixed">
+    <view class="action canui-checked">
+        <checkbox class='round red' checked="{{ allChecked }}" bindtap='checkAll'></checkbox>
+        全选
+    </view>
+    <view class="action canui-delete">
+        <button class='cu-btn icon-delete' bindtap='removeGoods'></button>
+    </view>
+    <view class='submit canui-price'>
+        合计
+        <text class="text-red text-price">{{ allPrice }}</text>
+    </view>
+    <view class='bg-red submit canui-submit' bindtap='submit'>去结算</view>
+</view>
+<!-- <view class='action-btn-sum'>
+    <button class='cu-btn'>-</button>
+    <input class='ca-sum' name='input' value="1"></input>
+    <button class='cu-btn'>+</button>
+</view> -->

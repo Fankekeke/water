@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "van-sidebar": "../../../dist/sidebar/index",
+    "van-sidebar-item": "../../../dist/sidebar-item/index",
+    "van-empty": "../../../dist/empty/index"
+  }
+}

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.ProductInfoMapper">
+
+    <!-- 分页获取商品信息 -->
+    <select id="productInfoByPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        pi.id,
+        pi.code,
+        pi.product_name AS productName,
+        pi.product_type AS productType,
+        dict.VALUEE AS productTypeLabel,
+        pi.images,
+        pi.content,
+        pi.standard,
+        pi.tag_ids AS tagIds,
+        pi.price,
+        pi.stock,
+        pi.shop_code AS shopCode,
+        pi.create_date AS createDate,
+        pi.delete_flag AS deleteFlag,
+        si.name AS shopName,
+        si.images AS shopImages,
+        si.qualification,
+        si.phone,
+        si.principal,
+        si.address,
+        si.delete_flag AS shopDeleteFlag
+        FROM
+        product_info pi
+        LEFT JOIN shop_info si ON si.`code` = pi.shop_code
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type ) AND dict.TABLE_NAME = 'product_info'
+        WHERE
+        1 = 1
+        <if test="productInfo.code != null and productInfo.code != ''">
+            AND pi.code LIKE CONCAT('%',#{productInfo.code},'%')
+        </if>
+        <if test="productInfo.productName != null and productInfo.productName != ''">
+            AND pi.product_name LIKE CONCAT('%',#{productInfo.productName},'%')
+        </if>
+        <if test="productInfo.productType != null">
+            AND pi.product_type = #{productInfo.productType}
+        </if>
+        <if test="productInfo.shopName != null and productInfo.shopName">
+            AND si.name LIKE CONCAT('%',#{productInfo.shopName},'%')
+        </if>
+        ORDER BY pi.create_date DESC
+    </select>
+
+    <!-- 热销商品 -->
+    <select id="productHot" resultType="java.util.LinkedHashMap">
+        SELECT
+        pi.code,
+        pi.product_name AS productName,
+        dict.VALUEE AS productTypeLabel,
+        pi.images,
+        pi.price,
+        si.images AS shopImages,
+        IFNULL( SUM( oitem.amount ), 0 ) AS amount
+        FROM
+        product_info pi
+        LEFT JOIN shop_info si ON ( si.`code` = pi.shop_code )
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type ) AND dict.TABLE_NAME = 'product_info'
+        LEFT JOIN order_item oitem ON ( oitem.product_code = pi.`code` )
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        AND oi.order_status IN ( 2, 3, 4 )
+        WHERE
+        1 = 1
+        AND pi.delete_flag = 0
+        AND si.delete_flag = 0
+        GROUP BY
+        pi.id
+        ORDER BY
+        amount DESC
+        <if test="limit != null">
+            limit #{ limit }
+        </if>
+    </select>
+
+    <!-- 商品详情 -->
+    <select id="productDetail" resultType="java.util.LinkedHashMap">
+        SELECT
+        pi.id,
+        pi.code,
+        pi.product_name AS productName,
+        pi.product_type AS productType,
+        dict.VALUEE AS productTypeLabel,
+        pi.images,
+        pi.content,
+        pi.standard,
+        pi.tag_ids AS tagIds,
+        pi.price,
+        pi.stock,
+        pi.shop_code AS shopCode,
+        pi.create_date AS createDate,
+        pi.delete_flag AS deleteFlag,
+        si.name AS shopName,
+        si.code AS shopCode,
+        IFNULL(SUM(oitem.amount),0) AS amount
+        FROM
+        product_info pi
+        LEFT JOIN shop_info si ON ( si.`code` = pi.shop_code )
+        LEFT JOIN order_item oitem ON ( oitem.product_code = pi.`code` )
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        AND oi.order_status IN ( 2, 3, 4 )
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type )
+        AND dict.TABLE_NAME = 'product_info'
+        WHERE
+        1 = 1
+        AND pi.delete_flag = 0
+        AND pi.code = #{ productCode }
+    </select>
+
+    <!-- 商家商品分类查询 -->
+    <select id="productSortList" resultType="java.util.LinkedHashMap">
+        SELECT
+        pi.id,
+        pi.`code`,
+        pi.product_name AS productName,
+        pi.images,
+        pi.price,
+        IFNULL( SUM( oitem.amount ), 0 ) AS orderNum
+        FROM
+        product_info pi
+        LEFT JOIN order_item oitem ON ( oitem.product_code = pi.`code` )
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        AND oi.order_status IN ( 2, 3, 4 )
+        WHERE
+        pi.delete_flag = 0
+        AND pi.shop_code = #{ shopCode }
+        <if test="key != null and key != ''">
+            AND pi.product_name LIKE CONCAT('%',#{ key },'%')
+        </if>
+        GROUP BY
+        pi.id
+        <if test="sort == 1">
+            ORDER BY orderNum DESC
+        </if>
+        <if test="sort == 2">
+            ORDER BY pi.create_date DESC
+        </if>
+        <if test="sort == 3">
+            ORDER BY pi.price ASC
+        </if>
+    </select>
+
+    <!-- 根据类型获取商品信息 -->
+    <select id="productListByType" resultType="java.util.LinkedHashMap">
+        SELECT
+        pi.code,
+        pi.product_name AS productName,
+        pi.product_type AS productType,
+        pi.content,
+        pi.tag_ids AS tagIds,
+        dict.VALUEE AS productTypeLabel,
+        pi.images,
+        pi.price,
+        pi.shop_code AS shopCode
+        FROM
+        product_info pi
+        LEFT JOIN t_dict AS dict ON ( dict.KEYY = pi.product_type )
+        AND dict.TABLE_NAME = 'product_info'
+        WHERE
+        pi.delete_flag = 0
+    </select>
+</mapper>

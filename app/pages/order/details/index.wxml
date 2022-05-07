@@ -1,0 +1,157 @@
+<view class="cu-custom" style="height:{{CustomBar}}px;">
+    <view class="cu-bar fixed none-bg text-white bg-img" style="height:{{CustomBar}}px;padding-top:{{StatusBar}}px;">
+        <navigator class='action canui-head-title' open-type="navigateBack" hover-class="none">
+            <text class='icon-back'></text>
+            订单详情
+        </navigator>
+    </view>
+</view>
+<view class="box" style="top:{{CustomBar}}px;">
+    <view class="canui-order-details-head">
+        <view class="cu-list menu">
+            <view class="cu-item">
+                <view class='content'>
+                    <view class="text-df">
+                        <text wx:if="{{ orderInfo.orderStatus == 1 }}">该订单并未付款！</text>
+                        <text wx:if="{{ orderInfo.orderStatus == 2 }}">已付款，正在准备发货</text>
+                        <text wx:if="{{ orderInfo.orderStatus == 3 }}">包裹正在运送路上</text>
+                        <text wx:if="{{ orderInfo.orderStatus == 4 }}">该订单已完成！</text>
+                    </view>
+                    <view class='text-sm'>{{ orderInfo.placeOrderDate }}</view>
+                </view>
+                <view class='action canui-status-3'></view>
+            </view>
+        </view>
+    </view>
+    <view class="padding canui-card-fiex-radius-box">
+        <view class="cu-list menu bg-white">
+            <view class="cu-item">
+                <view class='content'>
+                    <view class="canui-xzwz text-df">
+                        <text wx:if="{{ orderInfo.orderStatus == 1 }}">该订单并未付款！</text>
+                        <text wx:if="{{ orderInfo.orderStatus == 2 }}">已付款，正在准备发货</text>
+                        <text wx:if="{{ orderInfo.orderStatus == 3 }}">包裹正在运送路上</text>
+                        <text wx:if="{{ orderInfo.orderStatus == 4 }}">该订单已完成！</text>
+                    </view>
+                    <view class='text-gray text-sm'>{{ orderInfo.placeOrderDate }}</view>
+                </view>
+                <view class='action'>
+                    <view class='text-grey icon-right'></view>
+                </view>
+            </view>
+        </view>
+    </view>
+    <view class="bg-white canui-goods-box">
+        <view class="canui-card-order">
+            <view class="canui-order-item bg-white" wx:for="{{ orderItem }}">
+                <view class="head-title-box">
+                    <text class="icon-shop"></text>
+                    <text>{{ item.name }}</text>
+                    <text class="icon-right"></text>
+                </view>
+                <navigator open-type="navigate" hover-class='none'>
+                    <view class="cu-list menu menu-avatar" wx:for="{{ item.productList }}" wx:for-item="items">
+                        <view class="cu-item">
+                            <view class="cu-avatar radius lg" style="background-image:url(http://127.0.0.1:9527/imagesWeb/{{ items.image }});"></view>
+                            <view class='content canui-xzwz tow'>{{ items.productName }}</view>
+                            <view class='action'>
+                                <view class='text-price'>{{ items.price }}</view>
+                                <view class="text-xs text-right text-gray">
+                                    x{{ items.quantity }}
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </navigator>
+                <view class="cu-list menu bg-white solid-bottom canui-selet">
+                    <view class="cu-item">
+                        <view class='content'>
+                            共
+                            <text class="text-red">{{ item.amount }}</text>
+                            件商品
+                        </view>
+                        <view class='action'>
+                            合计
+                            <text class="text-price text-red">{{ item.allPrice }}</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view class="text-gray text-sm solid-bottom order-price-log">
+            <view class="log-list">
+                <text>商品总价</text>
+                <text class="text-price canui-text-right">{{ allPrice }}</text>
+            </view>
+            <view class="log-list" style="margin-top: 5px">
+                <text>运费(快递)</text>
+                <text class="text-price canui-text-right">0.00</text>
+            </view>
+            <view class="log-list bg-white text-df" style="margin-top: 5px">
+                <text>订单总价</text>
+                <text class="text-sm text-gray">（手续费除外）</text>
+                <text class="text-price canui-text-right">{{ allPrice }}</text>
+            </view>
+        </view>
+    </view>
+    <view class="margin-top order-address-box" wx:if="{{ address !== null }}">
+        <view class="cu-list menu bg-white">
+            <view class="cu-item">
+                <view class='content'>
+                    <view class="text-df">
+                        {{ address.takeUserName }}
+                        <text>{{ address.takeUserPhone }}</text>
+                    </view>
+                    <view class='text-gray text-sm canui-xzwz'>
+                        {{ address.address }}
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+    <view class="margin-top bg-white order-details-log">
+        <view class="order-menu-list solid-bottom">
+            <view class="log-list bg-white text-df">
+                <text>订单编号：</text>
+                <text class="text-gray">{{ orderInfo.code }}</text>
+            </view>
+            <view class="log-list bg-white text-df" style="margin-top: 5px">
+                <text>下单时间：</text>
+                <text class="text-gray">{{ orderInfo.placeOrderDate }}</text>
+            </view>
+            <view class="log-list bg-white text-df" style="margin-top: 5px" wx:if="{{ orderInfo.orderStatus != 1 }}">
+                <text>付款时间：</text>
+                <text class="text-gray">{{ orderInfo.payDate }}</text>
+            </view>
+        </view>
+        <view class="order-menu-list solid-bottom" style="margin-top: 5px" wx:if="{{ orderInfo.orderStatus > 2 }}">
+            <view class="log-list bg-white text-df">
+                <text>快递单号：</text>
+                <text class="text-gray">{{ order.mailingNumber }}</text>
+            </view>
+        </view>
+    </view>
+    <view class="grid col-2 flex bg-white order-contact-box">
+        <view class="contact-table">
+            <text class="icon-service text-blue"></text>
+            联系客服
+        </view>
+        <view class="contact-table">
+            <text class="icon-phone text-blue"></text>
+            电话联系
+        </view>
+    </view>
+</view>
+<!-- <view class="canui-foor-fixed bg-white {{TabbarBot=='y'?'canui-tabbar-bottom':''}}">
+    <view class="grid col-4 flex justify-end order-btn-box">
+        <view class='margin-tb-sm text-center'>
+            <button class='cu-btn round line-gray shadow'>删除订单</button>
+        </view>
+        <view class='margin-tb-sm text-center'>
+            <button class='cu-btn round line-gray shadow'>查看物流</button>
+        </view>
+        <view class='margin-tb-sm text-center'>
+            <button class='cu-btn round line-red shadow'>确认收货</button>
+        </view>
+    </view>
+</view> -->

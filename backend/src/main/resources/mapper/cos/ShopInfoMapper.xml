@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.ShopInfoMapper">
+
+    <!-- 分页查询商铺信息 -->
+    <select id="shopInfoByPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        si.id,
+        si.code,
+        si.name,
+        si.images,
+        si.content,
+        si.qualification,
+        si.phone,
+        si.principal,
+        si.address,
+        si.create_date AS createDate,
+        si.delete_flag AS deleteFlag
+        FROM
+        shop_info si
+        WHERE
+        1 = 1
+        <if test="shopInfo.code != null and shopInfo.code != ''">
+            AND si.code LIKE CONCAT('%',#{shopInfo.code},'%')
+        </if>
+        <if test="shopInfo.name != null and shopInfo.name != ''">
+            AND si.name LIKE CONCAT('%',#{shopInfo.name},'%')
+        </if>
+        <if test="shopInfo.phone != null and shopInfo.phone != ''">
+            AND si.phone LIKE CONCAT('%',#{shopInfo.phone},'%')
+        </if>
+        <if test="shopInfo.principal != null and shopInfo.principal != ''">
+            AND si.principal LIKE CONCAT('%',#{shopInfo.principal},'%')
+        </if>
+        ORDER BY si.create_date DESC
+    </select>
+
+    <!-- 热销商家 -->
+    <select id="shopInfoHot" resultType="java.util.LinkedHashMap">
+        SELECT
+        si.`name`,
+        si.images,
+        si.content,
+        IFNULL( SUM( oitem.amount ), 0 ) AS amount
+        FROM
+        shop_info si
+        LEFT JOIN product_info pi ON ( si.`code` = pi.shop_code )
+        LEFT JOIN order_item oitem ON ( oitem.product_code = pi.`code` )
+        LEFT JOIN order_info oi ON ( oi.`code` = oitem.order_code )
+        AND oi.order_status IN ( 2, 3, 4 )
+        WHERE
+        1 = 1
+        AND si.delete_flag = 0
+        GROUP BY
+        si.id
+        ORDER BY
+        amount DESC
+        <if test="limit != null">
+            limit #{ limit }
+        </if>
+    </select>
+
+    <!-- 获取商家信息 -->
+    <select id="shopList" resultType="java.util.LinkedHashMap">
+        SELECT
+        si.id,
+        si.code,
+        si.name,
+        si.images,
+        si.content,
+        si.phone,
+        si.principal,
+        si.address
+        FROM
+        shop_info si
+        WHERE
+        si.delete_flag = 0
+        ORDER BY si.create_date DESC
+    </select>
+
+    <!-- 根据商品编号获取商家信息 -->
+    <select id="shopListByProduct" resultType="java.util.LinkedHashMap">
+        SELECT
+        si.id,
+        si.code,
+        si.name
+        FROM
+        shop_info si
+        LEFT JOIN product_info pi ON ( pi.shop_code = si.`code` )
+        WHERE
+        si.delete_flag = 0
+        AND pi.`code` IN
+        <foreach item="item" collection="codes" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+        GROUP BY si.id
+    </select>
+</mapper>

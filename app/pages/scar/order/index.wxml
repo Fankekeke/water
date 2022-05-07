@@ -1,0 +1,98 @@
+<!--状态栏区域-->
+<view class="cu-custom" style="height:{{CustomBar}}px;">
+    <view class="cu-bar fixed none-bg text-white bg-img" style="height:{{CustomBar}}px;padding-top:{{StatusBar}}px;">
+        <navigator class='action canui-head-title' open-type="navigateBack" hover-class="none">
+            <text class='icon-back'></text> 结算订单
+        </navigator>
+    </view>
+</view>
+
+<view class="box" style="top: {{CustomBar}}px;">
+    <view class="canui-address">
+        <view class="cu-list menu bg-white">
+            <view class="cu-item">
+                <view class='content'>
+                    <view class="text-df">{{ addressInfo.takeUserName }} <text>{{ addressInfo.takeUserPhone }}</text></view>
+                    <view class='text-gray text-sm canui-xzwz'>{{ addressInfo.address }}</view>
+                </view>
+                <view class='action'><view class='text-grey icon-right' bindtap="showModal" data-target="RadioModal"></view></view>
+            </view>
+            <view class="canui-lines"></view>
+        </view>
+    </view>
+
+    <view class="cu-modal {{modalName=='RadioModal'?'show':''}}" bindtap="hideModal">
+        <view class="cu-dialog" catchtap>
+            <radio-group class="block" bindchange="addressChange">
+                <view class="cu-list menu text-left">
+                    <view class="cu-item" wx:for="{{ addressList }}" style="padding: 16px;">
+                        <label class="flex justify-between align-center flex-sub">
+                            <view class="flex-sub">
+                                <view class='content'>
+                                    <view class="text-df">{{ item.takeUserName }} <text>{{ item.takeUserPhone }}</text></view>
+                                    <view class='text-gray text-sm canui-xzwz'>{{ item.address }}</view>
+                                </view>
+                            </view>
+                            <radio class="round" value="{{ item.id }}"></radio>
+                        </label>
+                    </view>
+                </view>
+            </radio-group>
+        </view>
+    </view>
+
+    <view class="canui-card-order">
+        <view class="canui-order-item bg-white" wx:for="{{ orderItem }}">
+            <view class="head-title-box">
+                <text class="icon-shop"></text>
+                <text>{{ item.name }}</text>
+                <text class="icon-right"></text>
+            </view>
+            <navigator open-type="navigate" hover-class='none'>
+                <view class="cu-list menu menu-avatar" wx:for="{{ item.productList }}" wx:for-item="items">
+                    <view class="cu-item">
+                        <view class="cu-avatar radius lg" style="background-image:url(http://127.0.0.1:9527/imagesWeb/{{ items.image }});"></view>
+                        <view class='content canui-xzwz tow'>{{ items.productName }}</view>
+                        <view class='action'>
+                            <view class='text-price'>{{ items.price }}</view>
+                            <view class="text-xs text-right text-gray">x{{ items.quantity }}</view>
+                        </view>
+                    </view>
+                </view>
+            </navigator>
+            <view class="cu-list menu bg-white solid-bottom canui-selet">
+                <view class="cu-item">
+                    <view class='content'>
+                        共 <text class="text-red"> {{ item.amount }}</text> 件商品
+                    </view>
+                    <view class='action'>
+                        合计 <text class="text-price text-red">{{ item.allPrice }}</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <view class="order-price-log">
+        <view class="bg-white log-card">
+            <view class="log-list">
+                <text>商品总价</text> <text class="text-price canui-text-right">{{ allPrice }}</text>
+            </view>
+            <view class="log-list" style="margin-top: 10px">
+                <text>运费(快递)</text> <text class="text-price canui-text-right text-red">0.00</text>
+            </view>
+            <view class="log-list bg-white text-df" style="margin-top: 10px">
+                <text>订单总价</text><text class="text-sm text-gray"></text>
+                <text class="text-price canui-text-right text-red">{{ allPrice }}</text>
+            </view>
+        </view>
+    </view>
+
+</view>
+
+<view class="bg-white canui-foor-fixed canui-submit-view {{TabbarBot=='y'?'canui-submit-order':''}}" style="min-height: 0rpx;">
+    <view class="canui-submit">
+        <text class='text-red text-price canui-price'>{{ allPrice }}</text>
+        <text class='bg-red canui-submit-btn' bindtap='submit'>提交订单</text>
+    </view>
+</view>
